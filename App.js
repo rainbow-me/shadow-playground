@@ -23,7 +23,7 @@ import {
   DebugInstructions,
   ReloadInstructions,
 } from 'react-native/Libraries/NewAppScreen';
-import { Svg, Path, Rect, LinearGradient, Stop, Ellipse, Defs, RadialGradient } from 'react-native-svg'
+import { Svg, Path, Rect, LinearGradient, Stop, Ellipse, Defs, RadialGradient, G } from 'react-native-svg'
 
 
 const forLRBT = (s) => {
@@ -35,112 +35,280 @@ const forLRBT = (s) => {
   }
 }
 
-function linearGradFactory(args) {
+function linearGradFactory(args, opacity, color) {
   return (
     <LinearGradient x1="0" y1="0" x2="0" y2="0" {...args}>
       <Stop offset="0" stopColor="#FFFFFF00" stopOpacity="0" />
-      <Stop offset="1" stopColor="red" stopOpacity="1" />
+      <Stop offset="1" stopColor={color} stopOpacity={1} />
     </LinearGradient>
   )
 }
 
 
-function radialGradFactory({ id, x, y }) {
+function radialGradFactory({ id, x, y, transform }, opacity, color, shadowRadius) {
   return (
     <RadialGradient
       cx={x}
       cy={y}
-      rx="14"
-      ry="14"
+      rx={shadowRadius}
+      ry={shadowRadius}
       fx={x}
       fy={y}
       id={id}
+      transform={transform}
       gradientUnits="userSpaceOnUse"
     >
-      <Stop offset="0" stopColor="red" stopOpacity="1" />
-      <Stop offset="1" stopColor="#FFFFFF00" stopOpacity="0" />
+      <Stop offset="0" stopColor={color} stopOpacity={1} />
+      <Stop offset="1" stopColor="#FFFFFF" stopOpacity="0" />
     </RadialGradient>
   )
 }
 
-function ShadowView (props){
-  return <View {...props}>
-    <View style={{ width: 10, height: 10, bottom: -10, right: -10, position: 'absolute', backgroundColor: 'yellow' }} />
-    <View style={{ width: 10, height: 10, bottom: -10, left: -10, position: 'absolute', backgroundColor: 'yellow' }} />
-    <View style={{ ...forLRBT('-50%'), position: 'absolute', justifyContent: 'center' }}>
-    {/*<View style={{ position: 'absolute', width: '70%', height: '70%', alignSelf: 'center', backgroundColor: '#00220011'}}/>*/}
-      <Svg width="100%" height="100%">
-        <Defs>
-          {linearGradFactory({ id: "grad-top", y2: 1  })}
-          {linearGradFactory({ id: "grad-bottom", y1: 1  })}
-          {linearGradFactory({ id: "grad-left", x2: 1  })}
-          {linearGradFactory({ id: "grad-right", x1: 1  })}
-          {radialGradFactory({ id:"grad-top-right", y: "25%", x: "75%" })}
-          {radialGradFactory({ id:"grad-bottom-right", y: "75%", x: "75%" })}
-          {radialGradFactory({ id:"grad-top-left", y: "25%", x: "25%" })}
-          {radialGradFactory({ id:"grad-bottom-left", y: "75%", x: "25%" })}
-        </Defs>
-        <Rect
-          fill="url(#grad-right)"
-          height={"50%"}
-          width="14"
-          x="75%"
-          y={"25%"}
-        />
-        <Rect
-          fill="url(#grad-left)"
-          height={"50%"}
-          width="-14"
-          x="25%"
-          y={"25%"}
-        />
-        <Rect
-          fill="url(#grad-bottom)"
-          width={"50%"}
-          height="14"
-          y="75%"
-          x={"25%"}
-        />
-        <Rect
-          fill="url(#grad-top)"
-          width={"50%"}
-          height="-14"
-          y="25%"
-          x={"25%"}
-        />
-        <Rect
-          fill="url(#grad-top-right)"
-          width={"14"}
-          height="-14"
-          y="25%"
-          x={"75%"}
-        />
-        <Rect
-          fill="url(#grad-bottom-right)"
-          width={"14"}
-          height="14"
-          y="75%"
-          x={"75%"}
-        />
-        <Rect
-          fill="url(#grad-top-left)"
-          width={"-14"}
-          height="-14"
-          y="25%"
-          x={"25%"}
-        />
-        <Rect
-          fill="url(#grad-bottom-left)"
-          width={"-14"}
-          height="14"
-          y="75%"
-          x={"25%"}
-        />
-      </Svg>
-    {/*<View style={{ position: 'absolute', width: '62.5%', height: '62.5%', alignSelf: 'center', backgroundColor: '#0000DD11'}}/>*/}
-    </View>
-    {props.children}
-  </View>
+function splitPositionalStyleProps(style) {
+  const {
+    bottom,
+    direction,
+    display,
+    end,
+    left,
+    margin,
+    marginBottom,
+    marginEnd,
+    marginHorizontal,
+    marginLeft,
+    marginRight,
+    marginStart,
+    marginTop,
+    marginVertical,
+    position,
+    right,
+    start,
+    top,
+    zIndex,
+    backfaceVisibility,
+    opacity,
+    transform,
+    width,
+    height,
+    ...rest
+  } = style
+  return [{
+    bottom,
+    direction,
+    display,
+    end,
+    left,
+    margin,
+    marginBottom,
+    marginEnd,
+    marginHorizontal,
+    marginLeft,
+    marginRight,
+    marginStart,
+    marginTop,
+    marginVertical,
+    position,
+    right,
+    start,
+    top,
+    zIndex,
+    backfaceVisibility,
+    transform,
+    width,
+    opacity,
+    height
+  }, rest]
+}
+
+const INNERALIZING_OF_SHADOW = 2.8;
+const MULTIPLICATING_SHADOW = 4.9
+
+const EPSILON = 0.045
+
+function ShadowView (props) {
+  const fstyle = StyleSheet.flatten(props.style);
+  const { shadowColor, shadowOpacity = 1, shadowRadius, shadowOffset = { }, ...restStyle } = fstyle;
+  const { width = 0, height = 0 } = shadowOffset
+  const [outerProps, innerProps] = splitPositionalStyleProps(restStyle)
+
+  return (
+      <View {...props} style={[outerProps, { backgroundColor: 'transparent' }]}>
+        <View style={{ width: 10, height: 10, bottom: -10, right: -10, position: 'absolute' }} />
+        <View style={{ width: 10, height: 10, bottom: -10, left: -10, position: 'absolute' }} />
+        <View style={{ ...forLRBT('-50%'), position: 'absolute', justifyContent: 'center', opacity: 1, transform:[{ translateX: width }, { translateY: height }] }}>
+          <View style={{ width: '50%', height: '50%', top: 0, left: 0, backgroundColor: 'transparent', position: 'absolute' }}>
+            <Svg width="100%" height="100%" >
+              <Defs>
+                {linearGradFactory({ id: "grad-top", y2: 1  }, shadowOpacity, shadowColor)}
+                {linearGradFactory({ id: "grad-left", x2: 1  }, shadowOpacity, shadowColor)}
+                {radialGradFactory({ id:"grad-top-left", y: "50%", x: "50%", transform:`translate(${MULTIPLICATING_SHADOW * shadowRadius}, ${MULTIPLICATING_SHADOW * shadowRadius})`}, shadowOpacity, shadowColor, shadowRadius * MULTIPLICATING_SHADOW)}
+              </Defs>
+              <Rect
+                fill="url(#grad-left)"
+                height={"50%"}
+                width={-shadowRadius * MULTIPLICATING_SHADOW}
+                x="50%"
+                y="50%"
+                transform={`translate(${INNERALIZING_OF_SHADOW * shadowRadius}, ${INNERALIZING_OF_SHADOW * shadowRadius})`}
+              />
+              <Rect
+                fill="url(#grad-top)"
+                width={"50%"}
+                height={-shadowRadius * MULTIPLICATING_SHADOW}
+                y="50%"
+                x="50%"
+                transform={`translate(${INNERALIZING_OF_SHADOW * shadowRadius}, ${INNERALIZING_OF_SHADOW * shadowRadius})`}
+
+              />
+              <Rect
+                fill="url(#grad-top-left)"
+                width={shadowRadius * MULTIPLICATING_SHADOW}
+                height={shadowRadius * MULTIPLICATING_SHADOW}
+                y="50%"
+                x="50%"
+                transform={`translate(-${(MULTIPLICATING_SHADOW - INNERALIZING_OF_SHADOW) * shadowRadius}, -${(MULTIPLICATING_SHADOW - INNERALIZING_OF_SHADOW) * shadowRadius})`}
+              />
+              <Rect
+                fill={shadowColor}
+                width="50%"
+                height="50%"
+                y="50%"
+                x={"50%"}
+                transform={`translate(${(INNERALIZING_OF_SHADOW) * shadowRadius}, ${INNERALIZING_OF_SHADOW * shadowRadius})`}
+              />
+            </Svg>
+          </View>
+          <View style={{ width: '50%', height: '50%', top: 0, right: 0, backgroundColor: 'transparent', position: 'absolute' }}>
+            <Svg width="100%" height="100%" >
+              <Defs>
+                {linearGradFactory({ id: "grad-top", y2: 1  }, shadowOpacity, shadowColor)}
+                {linearGradFactory({ id: "grad-right", x1: 1  }, shadowOpacity, shadowColor)}
+                {radialGradFactory({ id:"grad-top-right", y: "50%", x: "50%", transform:`translate(0, ${MULTIPLICATING_SHADOW * shadowRadius})`}, shadowOpacity, shadowColor, shadowRadius * MULTIPLICATING_SHADOW)}
+              </Defs>
+              <Rect
+                fill="url(#grad-right)"
+                height={"50%"}
+                width={shadowRadius * MULTIPLICATING_SHADOW}
+                x="50%"
+                y="50%"
+                transform={`translate(${-INNERALIZING_OF_SHADOW * shadowRadius}, ${INNERALIZING_OF_SHADOW * shadowRadius})`}
+              />
+              <Rect
+                fill="url(#grad-top)"
+                width={"50%"}
+                height={shadowRadius * MULTIPLICATING_SHADOW}
+                y="50%"
+                x="0%"
+                transform={`translate(${-INNERALIZING_OF_SHADOW * shadowRadius}, ${(INNERALIZING_OF_SHADOW - MULTIPLICATING_SHADOW) * shadowRadius})`}
+
+              />
+              <Rect
+                fill="url(#grad-top-right)"
+                width={shadowRadius * MULTIPLICATING_SHADOW}
+                height={shadowRadius * MULTIPLICATING_SHADOW}
+                y="50%"
+                x="50%"
+                transform={`translate(${(-INNERALIZING_OF_SHADOW) * shadowRadius - 0}, ${-(MULTIPLICATING_SHADOW - INNERALIZING_OF_SHADOW) * shadowRadius})`}
+              />
+              <Rect
+                fill={shadowColor}
+                width="50%"
+                height="50%"
+                y="50%"
+                x={"0%"}
+                transform={`translate(${(-INNERALIZING_OF_SHADOW) * shadowRadius}, ${INNERALIZING_OF_SHADOW * shadowRadius})`}
+              />
+            </Svg>
+          </View>
+          <View style={{ width: '50%', height: '50%', bottom: 0, left: 0, backgroundColor: 'transparent', position: 'absolute' }}>
+            <Svg width="100%" height="100%" >
+              <Defs>
+                {linearGradFactory({ id: "grad-bottom", y1: 1  }, shadowOpacity, shadowColor)}
+                {linearGradFactory({ id: "grad-left", x2: 1  }, shadowOpacity, shadowColor)}
+                {radialGradFactory({ id:"grad-bottom-left", y: "50%", x: "50%", transform:`translate(${MULTIPLICATING_SHADOW * shadowRadius}, 0)`}, shadowOpacity, shadowColor, shadowRadius * MULTIPLICATING_SHADOW)}
+              </Defs>
+              <Rect
+                fill="url(#grad-left)"
+                height={"50%"}
+                width={-shadowRadius * MULTIPLICATING_SHADOW}
+                x="50%"
+                y="0%"
+                transform={`translate(${INNERALIZING_OF_SHADOW * shadowRadius}, ${-INNERALIZING_OF_SHADOW * shadowRadius})`}
+              />
+
+              <Rect
+                fill="url(#grad-bottom)"
+                width={"50%"}
+                height={shadowRadius * MULTIPLICATING_SHADOW}
+                y="50%"
+                x="50%"
+                transform={`translate(${INNERALIZING_OF_SHADOW * shadowRadius}, ${-INNERALIZING_OF_SHADOW * shadowRadius})`}
+              />
+              <Rect
+                fill="url(#grad-bottom-left)"
+                width={shadowRadius * MULTIPLICATING_SHADOW}
+                height={shadowRadius * MULTIPLICATING_SHADOW}
+                y="50%"
+                x="50%"
+                transform={`translate(${-(MULTIPLICATING_SHADOW - INNERALIZING_OF_SHADOW) * shadowRadius}, ${-INNERALIZING_OF_SHADOW * shadowRadius})`}
+              />
+              <Rect
+                fill={shadowColor}
+                width="50%"
+                height="50%"
+                y="0%"
+                x={"50%"}
+                transform={`translate(${(INNERALIZING_OF_SHADOW) * shadowRadius}, ${-INNERALIZING_OF_SHADOW * shadowRadius})`}
+              />
+            </Svg>
+          </View>
+          <View style={{ width: '50%', height: '50%', bottom: 0, right: 0, backgroundColor: 'absolute', position: 'absolute' }}>
+              <Svg width="100%" height="100%" >
+                <Defs>
+                  {linearGradFactory({ id: "grad-bottom", y1: 1  }, shadowOpacity, shadowColor)}
+                  {linearGradFactory({ id: "grad-right", x1: 1  }, shadowOpacity, shadowColor)}
+                  {radialGradFactory({ id:"grad-bottom-right", y: "50%", x: "50%" }, shadowOpacity, shadowColor, shadowRadius * MULTIPLICATING_SHADOW)}
+                </Defs>
+                <Rect
+                  fill="url(#grad-right)"
+                  height={"50%"}
+                  width={shadowRadius * MULTIPLICATING_SHADOW}
+                  x="50%"
+                  y="0%"
+                  transform={`translate(${-INNERALIZING_OF_SHADOW * shadowRadius}, ${-INNERALIZING_OF_SHADOW * shadowRadius})`}
+                />
+                <Rect
+                  fill="url(#grad-bottom)"
+                  width={"50%"}
+                  height={shadowRadius * MULTIPLICATING_SHADOW}
+                  y="50%"
+                  x={"0%"}
+                  transform={`translate(${-INNERALIZING_OF_SHADOW * shadowRadius}, ${-INNERALIZING_OF_SHADOW * shadowRadius})`}
+
+                />
+                <Rect
+                  fill="url(#grad-bottom-right)"
+                  width={shadowRadius * MULTIPLICATING_SHADOW}
+                  height={shadowRadius * MULTIPLICATING_SHADOW}
+                  y="50%"
+                  x={"50%"}
+                  transform={`translate(${-INNERALIZING_OF_SHADOW * shadowRadius}, ${-INNERALIZING_OF_SHADOW * shadowRadius})`}
+                />
+                <Rect
+                  fill={shadowColor}
+                  width="50%"
+                  height="50%"
+                  y="0%"
+                  x={"0%"}
+                  transform={`translate(${(-INNERALIZING_OF_SHADOW) * shadowRadius}, ${-INNERALIZING_OF_SHADOW * shadowRadius})`}
+                />
+              </Svg>
+          </View>
+        </View>
+        <View style={[innerProps, { width: '100%', height: '100%', position: 'absolute' }]}/>
+
+        {props.children}
+    </View>)
 
 }
 
@@ -151,7 +319,7 @@ const App: () => React$Node = () => {
       <StatusBar barStyle="dark-content" />
       <SafeAreaView>
         <View style={{
-          backgroundColor: 'yellow',
+          backgroundColor: 'violet',
           flexDirection: 'column',
           height: 800,
           borderWidth: 1,
@@ -186,7 +354,16 @@ const App: () => React$Node = () => {
           <ShadowView
             style={{
               margin: 50,
-              backgroundColor: 'green'
+              backgroundColor: 'green',
+              shadowColor: "#000",
+              shadowOffset: {
+                width: 0,
+                height: 0,
+              },
+              shadowOpacity: 0.5,
+              shadowRadius: 20,
+              flex: 1,
+              borderRadius: 0,
             }}
           >
             <View
@@ -199,31 +376,46 @@ const App: () => React$Node = () => {
             />
           </ShadowView>
 
-          <ShadowView
-            style={{
-              margin: 30,
-              backgroundColor: 'green'
-            }}
-          >
-            <View
-              style={{
-                margin: 50,
-                width: 100,
-                height: 50,
-                backgroundColor: 'red'
-              }}
-            />
-          </ShadowView>
+          {/*<ShadowView*/}
+          {/*  style={{*/}
+          {/*    margin: 30,*/}
+          {/*    backgroundColor: 'green',*/}
+          {/*    shadowColor: "#000",*/}
+          {/*    // shadowOffset: {*/}
+          {/*    //   width: 0,*/}
+          {/*    //   height: 2,*/}
+          {/*    // },*/}
+          {/*    shadowOpacity: 0.5,*/}
+          {/*    shadowRadius: 10,*/}
+          {/*  }}*/}
+          {/*>*/}
+          {/*  <View*/}
+          {/*    style={{*/}
+          {/*      margin: 50,*/}
+          {/*      width: 100,*/}
+          {/*      height: 50,*/}
+          {/*      backgroundColor: 'red'*/}
+          {/*    }}*/}
+          {/*  />*/}
+          {/*</ShadowView>*/}
 
           <View
             style={{
               margin: 50,
-              backgroundColor: 'green'
+              backgroundColor: 'green',
+              shadowColor: "#000",
+              shadowOffset: {
+                width: 0,
+                height: 0,
+              },
+              shadowOpacity: 0.5,
+              shadowRadius: 20,
+              flex: 1,
+              borderRadius: 0,
             }}
           >
             <View
               style={{
-                
                 margin: 50,
                 width: 100,
                 height: 100,
