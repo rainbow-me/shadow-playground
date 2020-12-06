@@ -124,18 +124,27 @@ function splitPositionalStyleProps(style) {
 const INNERALIZING_OF_SHADOW = 1.8;
 const MULTIPLICATING_SHADOW = 3.9
 
-const EPSILON = 0.045
+const MIN_RADIUS = 10
 
 function ShadowView (props) {
   const fstyle = StyleSheet.flatten(props.style);
   const { shadowColor, shadowOpacity = 1, shadowRadius, shadowOffset = { }, ...restStyle } = fstyle;
   const { width = 0, height = 0 } = shadowOffset
   const [outerProps, innerProps] = splitPositionalStyleProps(restStyle)
+  const {
+    borderRadius = 0,
+  } = innerProps;
+  const {
+    borderTopRightRadius: rawBorderTopRightRadius = borderRadius,
+    borderTopLeftRadius: rawBorderTopLeftRadius = borderRadius,
+    borderBottomRightRadius: rawBorderBottomRightRadius = borderRadius,
+    borderBottomLeftRadius: rawBorderBottomLeftRadius = borderRadius
+  }= innerProps;
 
-  const borderTopRightRadius = 15;
-  const borderTopLeftRadius = 0;
-  const borderBottomRightRadius = 0;
-  const borderBottomLeftRadius = 0;
+  const borderTopRightRadius = Math.max(rawBorderTopRightRadius, MIN_RADIUS)
+  const borderTopLeftRadius = Math.max(rawBorderTopLeftRadius, MIN_RADIUS)
+  const borderBottomRightRadius = Math.max(rawBorderBottomRightRadius, MIN_RADIUS)
+  const borderBottomLeftRadius = Math.max(rawBorderBottomLeftRadius, MIN_RADIUS)
 
 
   return (
@@ -431,17 +440,17 @@ const App: () => React$Node = () => {
           <ShadowView
             style={{
               margin: 50,
-              backgroundColor: 'transparent',
+              backgroundColor: 'red',
               shadowColor: "#000",
               shadowOffset: {
                 width: 10,
-                height: 0,
+                height: 10,
               },
               shadowOpacity: 0.5,
               shadowRadius: 10,
               flex: 1,
               borderRadius: 0,
-              borderTopRightRadius: 10,
+              borderTopRightRadius: 30,
             }}
           >
             <View
@@ -449,7 +458,7 @@ const App: () => React$Node = () => {
                 margin: 50,
                 width: 100,
                 height: 100,
-                backgroundColor: 'red'
+                backgroundColor: 'transparent'
               }}
             />
           </ShadowView>
