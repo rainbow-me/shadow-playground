@@ -135,7 +135,7 @@ function ShadowView (props) {
   const borderTopRightRadius = 15;
   const borderTopLeftRadius = 0;
   const borderBottomRightRadius = 0;
-  const borderBottomLeftRadius = 15;
+  const borderBottomLeftRadius = 0;
 
 
   return (
@@ -176,7 +176,7 @@ function ShadowView (props) {
                 transform={`translate(-${(MULTIPLICATING_SHADOW - INNERALIZING_OF_SHADOW) * shadowRadius}, -${(MULTIPLICATING_SHADOW - INNERALIZING_OF_SHADOW) * shadowRadius})`}
               />
               <Rect
-                fill={"blue"}
+                fill={shadowColor}
                 width="50%"
                 height="50%"
                 y="50%"
@@ -184,22 +184,22 @@ function ShadowView (props) {
                 transform={`translate(${(INNERALIZING_OF_SHADOW) * shadowRadius + borderTopLeftRadius}, ${INNERALIZING_OF_SHADOW * shadowRadius + borderTopLeftRadius})`}
               />
               <Rect
-                fill={"yellow"}
-                width="15"
+                fill={shadowColor}
+                width={borderTopLeftRadius}
                 height="50%"
                 y="50%"
                 x="50%"
                 transform={`translate(${(INNERALIZING_OF_SHADOW) * shadowRadius}, ${INNERALIZING_OF_SHADOW * shadowRadius + borderTopLeftRadius})`}
               />
               <Rect
-                fill={"yellow"}
+                fill={shadowColor}
                 width="50%"
-                height="15"
+                height={borderTopLeftRadius}
                 y="50%"
                 x="50%"
                 transform={`translate(${(INNERALIZING_OF_SHADOW) * shadowRadius + borderTopLeftRadius}, ${INNERALIZING_OF_SHADOW * shadowRadius })`}
               />
-              <Circle cx="50%" cy="50%" r={borderTopLeftRadius} fill={"red"} transform={`translate(${INNERALIZING_OF_SHADOW * shadowRadius + borderTopLeftRadius}, ${INNERALIZING_OF_SHADOW * shadowRadius + borderTopLeftRadius})`} />
+              <Circle cx="50%" cy="50%" r={borderTopLeftRadius} fill={shadowColor} transform={`translate(${INNERALIZING_OF_SHADOW * shadowRadius + borderTopLeftRadius}, ${INNERALIZING_OF_SHADOW * shadowRadius + borderTopLeftRadius})`} />
             </Svg>
           </View>
           <View style={{ width: '50%', height: '50%', top: 0, right: 0, backgroundColor: 'transparent', position: 'absolute' }}>
@@ -207,7 +207,7 @@ function ShadowView (props) {
               <Defs>
                 {linearGradFactory({ id: "grad-top", y2: 1  }, shadowOpacity, shadowColor)}
                 {linearGradFactory({ id: "grad-right", x1: 1  }, shadowOpacity, shadowColor)}
-                {radialGradFactory({ id:"grad-top-right", y: "50%", x: "50%", transform:`translate(0, ${MULTIPLICATING_SHADOW * shadowRadius})`}, shadowOpacity, shadowColor, shadowRadius * MULTIPLICATING_SHADOW)}
+                {radialGradFactory({ id:"grad-top-right", y: "50%", x: "50%", transform:`translate(0, ${MULTIPLICATING_SHADOW * shadowRadius + borderTopRightRadius})`}, shadowOpacity, shadowColor, shadowRadius * MULTIPLICATING_SHADOW, borderTopRightRadius)}
               </Defs>
               <Rect
                 fill="url(#grad-right)"
@@ -215,7 +215,7 @@ function ShadowView (props) {
                 width={shadowRadius * MULTIPLICATING_SHADOW}
                 x="50%"
                 y="50%"
-                transform={`translate(${-INNERALIZING_OF_SHADOW * shadowRadius}, ${INNERALIZING_OF_SHADOW * shadowRadius})`}
+                transform={`translate(${-INNERALIZING_OF_SHADOW * shadowRadius}, ${INNERALIZING_OF_SHADOW * shadowRadius + borderTopRightRadius})`}
               />
               <Rect
                 fill="url(#grad-top)"
@@ -223,16 +223,16 @@ function ShadowView (props) {
                 height={shadowRadius * MULTIPLICATING_SHADOW}
                 y="50%"
                 x="0%"
-                transform={`translate(${-INNERALIZING_OF_SHADOW * shadowRadius}, ${(INNERALIZING_OF_SHADOW - MULTIPLICATING_SHADOW) * shadowRadius})`}
+                transform={`translate(${-INNERALIZING_OF_SHADOW * shadowRadius - borderTopRightRadius}, ${(INNERALIZING_OF_SHADOW - MULTIPLICATING_SHADOW) * shadowRadius})`}
 
               />
               <Rect
                 fill="url(#grad-top-right)"
-                width={shadowRadius * MULTIPLICATING_SHADOW}
-                height={shadowRadius * MULTIPLICATING_SHADOW}
+                width={shadowRadius * MULTIPLICATING_SHADOW + borderTopRightRadius}
+                height={shadowRadius * MULTIPLICATING_SHADOW + borderTopRightRadius}
                 y="50%"
                 x="50%"
-                transform={`translate(${(-INNERALIZING_OF_SHADOW) * shadowRadius - 0}, ${-(MULTIPLICATING_SHADOW - INNERALIZING_OF_SHADOW) * shadowRadius})`}
+                transform={`translate(${(-INNERALIZING_OF_SHADOW) * shadowRadius - borderTopRightRadius}, ${-(MULTIPLICATING_SHADOW - INNERALIZING_OF_SHADOW) * shadowRadius})`}
               />
               <Rect
                 fill={shadowColor}
@@ -240,8 +240,26 @@ function ShadowView (props) {
                 height="50%"
                 y="50%"
                 x={"0%"}
-                transform={`translate(${(-INNERALIZING_OF_SHADOW) * shadowRadius}, ${INNERALIZING_OF_SHADOW * shadowRadius})`}
+                transform={`translate(${(-INNERALIZING_OF_SHADOW) * shadowRadius - borderTopRightRadius}, ${INNERALIZING_OF_SHADOW * shadowRadius + borderTopRightRadius})`}
               />
+              <Rect
+                fill={shadowColor}
+                width={borderTopRightRadius}
+                height="50%"
+                y="50%"
+                x={"50%"}
+                transform={`translate(${(-INNERALIZING_OF_SHADOW) * shadowRadius - borderTopRightRadius}, ${INNERALIZING_OF_SHADOW * shadowRadius + borderTopRightRadius})`}
+              />
+              <Rect
+                fill={shadowColor}
+                width="50%"
+                height={borderTopRightRadius}
+                y="50%"
+                x={"0%"}
+                transform={`translate(${(-INNERALIZING_OF_SHADOW) * shadowRadius - borderTopRightRadius}, ${INNERALIZING_OF_SHADOW * shadowRadius})`}
+              />
+              <Circle cx="50%" cy="50%" r={borderTopRightRadius} fill={shadowColor} transform={`translate(${- INNERALIZING_OF_SHADOW * shadowRadius - borderTopRightRadius}, ${INNERALIZING_OF_SHADOW * shadowRadius + borderTopRightRadius})`} />
+
             </Svg>
           </View>
           <View style={{ width: '50%', height: '50%', bottom: 0, left: 0, backgroundColor: 'transparent', position: 'absolute' }}>
@@ -249,7 +267,7 @@ function ShadowView (props) {
               <Defs>
                 {linearGradFactory({ id: "grad-bottom", y1: 1  }, shadowOpacity, shadowColor)}
                 {linearGradFactory({ id: "grad-left", x2: 1  }, shadowOpacity, shadowColor)}
-                {radialGradFactory({ id:"grad-bottom-left", y: "50%", x: "50%", transform:`translate(${MULTIPLICATING_SHADOW * shadowRadius}, 0)`}, shadowOpacity, shadowColor, shadowRadius * MULTIPLICATING_SHADOW)}
+                {radialGradFactory({ id:"grad-bottom-left", y: "50%", x: "50%", transform:`translate(${MULTIPLICATING_SHADOW * shadowRadius + borderBottomLeftRadius}, 0)`}, shadowOpacity, shadowColor, shadowRadius * MULTIPLICATING_SHADOW, borderBottomLeftRadius)}
               </Defs>
               <Rect
                 fill="url(#grad-left)"
@@ -257,7 +275,7 @@ function ShadowView (props) {
                 width={-shadowRadius * MULTIPLICATING_SHADOW}
                 x="50%"
                 y="0%"
-                transform={`translate(${INNERALIZING_OF_SHADOW * shadowRadius}, ${-INNERALIZING_OF_SHADOW * shadowRadius})`}
+                transform={`translate(${INNERALIZING_OF_SHADOW * shadowRadius}, ${-INNERALIZING_OF_SHADOW * shadowRadius - borderBottomLeftRadius})`}
               />
 
               <Rect
@@ -266,15 +284,15 @@ function ShadowView (props) {
                 height={shadowRadius * MULTIPLICATING_SHADOW}
                 y="50%"
                 x="50%"
-                transform={`translate(${INNERALIZING_OF_SHADOW * shadowRadius}, ${-INNERALIZING_OF_SHADOW * shadowRadius})`}
+                transform={`translate(${INNERALIZING_OF_SHADOW * shadowRadius + borderBottomLeftRadius}, ${-INNERALIZING_OF_SHADOW * shadowRadius})`}
               />
               <Rect
                 fill="url(#grad-bottom-left)"
-                width={shadowRadius * MULTIPLICATING_SHADOW}
-                height={shadowRadius * MULTIPLICATING_SHADOW}
+                width={shadowRadius * MULTIPLICATING_SHADOW + borderBottomLeftRadius}
+                height={shadowRadius * MULTIPLICATING_SHADOW + borderBottomLeftRadius}
                 y="50%"
                 x="50%"
-                transform={`translate(${-(MULTIPLICATING_SHADOW - INNERALIZING_OF_SHADOW) * shadowRadius}, ${-INNERALIZING_OF_SHADOW * shadowRadius})`}
+                transform={`translate(${-(MULTIPLICATING_SHADOW - INNERALIZING_OF_SHADOW) * shadowRadius}, ${-INNERALIZING_OF_SHADOW * shadowRadius - borderBottomLeftRadius})`}
               />
               <Rect
                 fill={shadowColor}
@@ -282,8 +300,26 @@ function ShadowView (props) {
                 height="50%"
                 y="0%"
                 x={"50%"}
-                transform={`translate(${(INNERALIZING_OF_SHADOW) * shadowRadius}, ${-INNERALIZING_OF_SHADOW * shadowRadius})`}
+                transform={`translate(${(INNERALIZING_OF_SHADOW) * shadowRadius + borderBottomLeftRadius}, ${-INNERALIZING_OF_SHADOW * shadowRadius - borderBottomLeftRadius})`}
               />
+              <Rect
+                fill={shadowColor}
+                width={borderBottomLeftRadius}
+                height="50%"
+                y="0%"
+                x={"50%"}
+                transform={`translate(${(INNERALIZING_OF_SHADOW) * shadowRadius}, ${-INNERALIZING_OF_SHADOW * shadowRadius - borderBottomLeftRadius})`}
+              />
+              <Rect
+                fill={shadowColor}
+                height={borderBottomLeftRadius}
+                width="50%"
+                y="50%"
+                x={"50%"}
+                transform={`translate(${(INNERALIZING_OF_SHADOW) * shadowRadius + borderBottomLeftRadius}, ${-INNERALIZING_OF_SHADOW * shadowRadius - borderBottomLeftRadius})`}
+              />
+              <Circle cx="50%" cy="50%" r={borderBottomLeftRadius} fill={shadowColor} transform={`translate(${INNERALIZING_OF_SHADOW * shadowRadius + borderBottomLeftRadius}, ${-INNERALIZING_OF_SHADOW * shadowRadius - borderBottomLeftRadius})`} />
+
             </Svg>
           </View>
           <View style={{ width: '50%', height: '50%', bottom: 0, right: 0, backgroundColor: 'absolute', position: 'absolute' }}>
@@ -319,7 +355,7 @@ function ShadowView (props) {
                   transform={`translate(${-INNERALIZING_OF_SHADOW * shadowRadius - borderBottomRightRadius}, ${-INNERALIZING_OF_SHADOW * shadowRadius - borderBottomRightRadius})`}
                 />
                 <Rect
-                  fill={"blue"}
+                  fill={shadowColor}
                   width="50%"
                   height="50%"
                   y="0%"
@@ -327,7 +363,7 @@ function ShadowView (props) {
                   transform={`translate(${(-INNERALIZING_OF_SHADOW) * shadowRadius - borderBottomRightRadius}, ${-INNERALIZING_OF_SHADOW * shadowRadius - borderBottomRightRadius})`}
                 />
                 <Rect
-                  fill={"yellow"}
+                  fill={shadowColor}
                   width={borderBottomRightRadius}
                   height="50%"
                   y="0%"
@@ -335,14 +371,14 @@ function ShadowView (props) {
                   transform={`translate(${- INNERALIZING_OF_SHADOW * shadowRadius - borderBottomRightRadius}, ${- INNERALIZING_OF_SHADOW * shadowRadius - borderBottomRightRadius})`}
                 />
                 <Rect
-                  fill={"yellow"}
+                  fill={shadowColor}
                   width="50%"
                   height={borderBottomRightRadius}
                   y="50%"
                   x={"0%"}
                   transform={`translate(${- INNERALIZING_OF_SHADOW * shadowRadius - borderBottomRightRadius}, ${- INNERALIZING_OF_SHADOW * shadowRadius - borderBottomRightRadius})`}
                 />
-                <Circle cx="50%" cy="50%" r={borderBottomRightRadius} fill={"red"} transform={`translate(${- INNERALIZING_OF_SHADOW * shadowRadius - borderBottomRightRadius}, ${- INNERALIZING_OF_SHADOW * shadowRadius - borderBottomRightRadius})`} />
+                <Circle cx="50%" cy="50%" r={borderBottomRightRadius} fill={shadowColor} transform={`translate(${- INNERALIZING_OF_SHADOW * shadowRadius - borderBottomRightRadius}, ${- INNERALIZING_OF_SHADOW * shadowRadius - borderBottomRightRadius})`} />
               </Svg>
           </View>
         </View>
@@ -395,7 +431,7 @@ const App: () => React$Node = () => {
           <ShadowView
             style={{
               margin: 50,
-              backgroundColor: 'green',
+              backgroundColor: 'transparent',
               shadowColor: "#000",
               shadowOffset: {
                 width: 10,
